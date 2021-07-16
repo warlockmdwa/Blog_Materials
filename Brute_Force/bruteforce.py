@@ -1,31 +1,30 @@
 import zipfile
-import py7zr
-sifre_listesi = input("Sifrelerin oldugu dosyayi giriniz: ")
-kirilacak_dosya = input("Kirilacak dosyayi giriniz: ")
-
-try:
-	def picklock(obj):
-		with open(sifre_listesi, "rb") as veri:
-			for diziler in veri:
-				for kelime in diziler.split():
-					try:
-						obj.extractall(pwd=kelime)
-						print("Sifre: ", kelime.decode())
-						return True
-					except:
-						continue
-		return False
+from tqdm import tqdm
 
 
+def main():
+	sifre_listesi = input("Sifrelerin oldugu dosyayi giriniz: ")
+	kirilacak_dosya = input("Kirilacak dosyayi giriniz: ")
+
+	denemeler = len(list(open(sifre_listesi, "rb")))
 	dosya = zipfile.ZipFile(kirilacak_dosya)
 
-	deneme_sayimi = len(list(open(sifre_listesi, "rb")))
+	with open(sifre_listesi, "rb") as veri:
+		for diziler in tqdm(veri, total=denemeler):
+			try:
+				dosya.extractall(pwd=diziler.strip())
+				sonuc = str(diziler.decode().strip())
+				print("Sifre: "+sonuc)
+			except:
+				continue
 
-	print(deneme_sayimi, " sifre test edildi.")
+	f = open("sifrelog.txt", "a+")
 
-	if picklock(dosya) == False:
-		print("Sifre bulunamamawk")
+	f.write("Kaydedilen sifre: " + sonuc +" \n")
+	f.close()
 
-except:
-	print("Hatali girmissin kardsm")
+	print(denemeler, " sifre test edildi.")
 
+
+if __name__ == '__main__':
+	main()
